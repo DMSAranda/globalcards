@@ -1,4 +1,4 @@
-package org.santander.cards.domain.model;
+package com.santander.globalcards.domain.records;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

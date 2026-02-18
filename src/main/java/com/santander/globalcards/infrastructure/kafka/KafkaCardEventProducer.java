@@ -1,9 +1,9 @@
-package org.santander.cards.infrastructure.kafka;
+package com.santander.globalcards.infrastructure.kafka;
 
-import org.santander.cards.domain.model.CardEvent;
+import com.santander.globalcards.domain.records.CardEvent;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
-import org.santander.cards.application.ports.out.CardEventPublisher;
+import com.santander.globalcards.application.ports.out.CardEventPublisher;
 
 @Component
 public class KafkaCardEventProducer implements CardEventPublisher {

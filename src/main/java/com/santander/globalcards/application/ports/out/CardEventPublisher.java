@@ -1,6 +1,6 @@
-package org.santander.cards.application.ports.out;
+package com.santander.globalcards.application.ports.out;
 
-import org.santander.cards.domain.model.CardEvent;
+import com.santander.globalcards.domain.records.CardEvent;
 
 public interface CardEventPublisher {
     void publishCardOk(CardEvent event);
