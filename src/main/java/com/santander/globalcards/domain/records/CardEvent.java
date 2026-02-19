@@ -1,10 +1,7 @@
 package com.santander.globalcards.domain.records;
 
 import com.santander.globalcards.domain.enums.CardStatus;
-
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.UUID;
 
 public record CardEvent(
 
@@ -13,6 +10,9 @@ public record CardEvent(
         String holder,
         CardStatus status,
         String source,
+        String batchId,
+        String fileName,
+        int partNumber,
         Instant timestamp
 ) {}
 

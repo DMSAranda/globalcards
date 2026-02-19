@@ -14,3 +14,34 @@ spring:
       properties:
         linger.ms: 5
         enable.idempotence: true
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/globalcards
+    username: postgres
+    password: password
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+# AWS Configuration
+aws:
+  region: us-east-1
+  credentials:
+    access-key: ${AWS_ACCESS_KEY_ID:}
+    secret-key: ${AWS_SECRET_ACCESS_KEY:}
+  s3:
+    bucket: global-cards-bucket
+    input-folder: input/
+    output-folder: output/
+
+# Logging
+logging:
+  level:
+    com.santander.globalcards: DEBUG
+    software.amazon.awssdk: DEBUG
