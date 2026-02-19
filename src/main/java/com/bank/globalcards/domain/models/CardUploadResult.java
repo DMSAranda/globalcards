@@ -1,4 +1,4 @@
-package com.santander.globalcards.domain.models;
+package com.bank.globalcards.domain.models;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

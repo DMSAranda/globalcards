@@ -1,4 +1,4 @@
-package com.santander.globalcards;
+package com.bank.globalcards;
 
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 

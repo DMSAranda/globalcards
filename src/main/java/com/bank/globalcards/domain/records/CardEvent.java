@@ -1,6 +1,6 @@
-package com.santander.globalcards.domain.records;
+package com.bank.globalcards.domain.records;
 
-import com.santander.globalcards.domain.enums.CardStatus;
+import com.bank.globalcards.domain.enums.CardStatus;
 import java.time.Instant;
 
 public record CardEvent(

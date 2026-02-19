@@ -1,11 +1,11 @@
-package com.santander.globalcards.application.services;
+package com.bank.globalcards.application.services;
 
-import com.santander.globalcards.domain.models.Card;
-import com.santander.globalcards.domain.models.CardFile;
-import com.santander.globalcards.domain.models.CardUploadResult;
-import com.santander.globalcards.domain.records.CardEvent;
-import com.santander.globalcards.domain.enums.CardStatus;
-import com.santander.globalcards.application.ports.out.CardStoragePort;
+import com.bank.globalcards.domain.models.Card;
+import com.bank.globalcards.domain.models.CardFile;
+import com.bank.globalcards.domain.models.CardUploadResult;
+import com.bank.globalcards.domain.records.CardEvent;
+import com.bank.globalcards.domain.enums.CardStatus;
+import com.bank.globalcards.application.ports.out.CardStoragePort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

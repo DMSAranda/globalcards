@@ -1,4 +1,4 @@
-package com.santander.globalcards.config;
+package com.bank.globalcards.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

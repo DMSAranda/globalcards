@@ -1,4 +1,4 @@
-package com.santander.globalcards.domain.enums;
+package com.bank.globalcards.domain.enums;
 
 public enum CardStatus {
     CREATED,

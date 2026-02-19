@@ -1,6 +1,6 @@
-package com.santander.globalcards.domain.models;
+package com.bank.globalcards.domain.models;
 
-import com.santander.globalcards.domain.enums.CardStatus;
+import com.bank.globalcards.domain.enums.CardStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

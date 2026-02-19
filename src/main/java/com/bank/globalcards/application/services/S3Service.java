@@ -1,6 +1,6 @@
-package com.santander.globalcards.application.services;
+package com.bank.globalcards.application.services;
 
-import com.santander.globalcards.config.S3Properties;
+import com.bank.globalcards.config.S3Properties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -8,7 +8,6 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.List;
 
