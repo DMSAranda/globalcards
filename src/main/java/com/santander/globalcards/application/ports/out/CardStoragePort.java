@@ -1,11 +1,12 @@
 package com.santander.globalcards.application.ports.out;
 
-import com.santander.globalcards.domain.model.Card;
+import com.santander.globalcards.domain.models.Card;
+import com.santander.globalcards.domain.models.CardUploadResult;
 
 import java.util.List;
 
 public interface CardStoragePort {
 
-    void uploadChunk(List<Card> cards, String fileName, int partNumber);
+    CardUploadResult uploadChunk(List<Card> cards, String fileName, int partNumber);
 
 }
