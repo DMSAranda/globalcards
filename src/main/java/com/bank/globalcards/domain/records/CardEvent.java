@@ -1,6 +1,7 @@
 package com.bank.globalcards.domain.records;
 
 import com.bank.globalcards.domain.enums.CardStatus;
+
 import java.time.Instant;
 
 public record CardEvent(

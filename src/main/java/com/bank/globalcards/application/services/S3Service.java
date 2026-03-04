@@ -1,6 +1,6 @@
 package com.bank.globalcards.application.services;
 
-import com.bank.globalcards.config.S3Properties;
+import com.bank.globalcards.infrastructure.s3.S3Properties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,19 +21,19 @@ public class S3Service {
 
     public List<String> listInputFiles() {
         ListObjectsV2Request request = ListObjectsV2Request.builder()
-                .bucket(s3Properties.getBucket())
-                .prefix(s3Properties.getInputFolder())
+                .bucket(s3Properties.getS3().getBucket())
+                .prefix(s3Properties.getS3().getInputFolder())
                 .build();
 
         ListObjectsV2Response response = s3Client.listObjectsV2(request);
         return response.contents().stream()
-                .map(object -> object.key())
+                .map(S3Object::key)
                 .toList();
     }
 
     public InputStream downloadFile(String key) {
         GetObjectRequest request = GetObjectRequest.builder()
-                .bucket(s3Properties.getBucket())
+                .bucket(s3Properties.getS3().getBucket())
                 .key(key)
                 .build();
 
@@ -41,10 +41,10 @@ public class S3Service {
     }
 
     public void uploadFile(String fileName, byte[] content) {
-        String outputKey = s3Properties.getOutputFolder() + fileName;
+        String outputKey = s3Properties.getS3().getOutputFolder() + fileName;
         
         PutObjectRequest request = PutObjectRequest.builder()
-                .bucket(s3Properties.getBucket())
+                .bucket(s3Properties.getS3().getBucket())
                 .key(outputKey)
                 .build();
 
@@ -54,16 +54,16 @@ public class S3Service {
 
     public void moveFile(String sourceKey, String destinationKey) {
         CopyObjectRequest copyRequest = CopyObjectRequest.builder()
-                .sourceBucket(s3Properties.getBucket())
+                .sourceBucket(s3Properties.getS3().getBucket())
                 .sourceKey(sourceKey)
-                .destinationBucket(s3Properties.getBucket())
+                .destinationBucket(s3Properties.getS3().getBucket())
                 .destinationKey(destinationKey)
                 .build();
 
         s3Client.copyObject(copyRequest);
 
         DeleteObjectRequest deleteRequest = DeleteObjectRequest.builder()
-                .bucket(s3Properties.getBucket())
+                .bucket(s3Properties.getS3().getBucket())
                 .key(sourceKey)
                 .build();
 
@@ -74,7 +74,7 @@ public class S3Service {
     public boolean fileExists(String key) {
         try {
             HeadObjectRequest request = HeadObjectRequest.builder()
-                    .bucket(s3Properties.getBucket())
+                    .bucket(s3Properties.getS3().getBucket())
                     .key(key)
                     .build();
             

@@ -1,9 +1,9 @@
 package com.bank.globalcards.infrastructure.kafka;
 
+import com.bank.globalcards.application.ports.out.CardEventPublisher;
 import com.bank.globalcards.domain.records.CardEvent;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
-import com.bank.globalcards.application.ports.out.CardEventPublisher;
 
 @Component
 public class KafkaCardEventProducer implements CardEventPublisher {
