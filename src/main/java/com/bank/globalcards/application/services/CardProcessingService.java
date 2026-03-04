@@ -1,7 +1,10 @@
 package com.bank.globalcards.application.services;
 
+import com.bank.globalcards.application.ports.out.BatchJobRepository;
+import com.bank.globalcards.application.ports.out.CardEventPublisher;
 import com.bank.globalcards.application.ports.out.CardStoragePort;
 import com.bank.globalcards.domain.enums.CardStatus;
+import com.bank.globalcards.domain.models.BatchJob;
 import com.bank.globalcards.domain.models.Card;
 import com.bank.globalcards.domain.models.CardFile;
 import com.bank.globalcards.domain.models.CardUploadResult;
@@ -12,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Servicio principal que orquesta el procesamiento de tarjetas
@@ -23,8 +27,8 @@ import java.util.List;
 public class CardProcessingService {
 
     private final CardStoragePort cardStoragePort;
-    // TODO: Add Kafka producer port
-    // TODO: Add metadata repository port
+    private final CardEventPublisher cardEventPublisher;
+    private final BatchJobRepository batchJobRepository;
 
     /**
      * Procesa un lote de tarjetas desde un fichero
@@ -99,7 +103,55 @@ public class CardProcessingService {
             Instant.now()
         );
         
-        // TODO: Implementar kafka producer
+        // Publicar evento según estado
+        if (status == CardStatus.PROCESSED) {
+            cardEventPublisher.publishCardOk(event);
+        } else {
+            cardEventPublisher.publishCardKo(event);
+        }
+        
         log.debug("Card event published: {}", event);
+    }
+
+    /**
+     * Crea un nuevo batch job
+     */
+    public BatchJob createBatchJob(String batchId, String fileName, Integer totalRecords) {
+        BatchJob batchJob = BatchJob.builder()
+                .batchId(batchId)
+                .fileName(fileName)
+                .status("PENDING")
+                .totalRecords(totalRecords)
+                .processedRecords(0)
+                .failedRecords(0)
+                .build();
+        
+        return batchJobRepository.save(batchJob);
+    }
+
+    /**
+     * Actualiza el estado de un batch job
+     */
+    public void updateBatchJobStatus(String batchId, String status, Integer processed, Integer failed) {
+        BatchJob batchJob = batchJobRepository.findByBatchId(batchId)
+                .orElseThrow(() -> new RuntimeException("Batch job not found: " + batchId));
+        
+        batchJob.setStatus(status);
+        if (processed != null) batchJob.setProcessedRecords(processed);
+        if (failed != null) batchJob.setFailedRecords(failed);
+        
+        if ("COMPLETED".equals(status) || "FAILED".equals(status)) {
+            batchJob.setEndTime(Instant.now());
+        }
+        
+        batchJobRepository.save(batchJob);
+    }
+
+    public Optional<BatchJob> getBatchJob(String batchId) {
+        return batchJobRepository.findByBatchId(batchId);
+    }
+
+    public List<BatchJob> getBatchJobsByStatus(String status) {
+        return batchJobRepository.findByStatus(status);
     }
 }

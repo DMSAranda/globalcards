@@ -1,6 +1,6 @@
-package com.bank.globalcards.application.services;
+package com.bank.globalcards.infrastructure.s3;
 
-import com.bank.globalcards.infrastructure.s3.S3Properties;
+import com.bank.globalcards.application.ports.out.BatchJobRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
