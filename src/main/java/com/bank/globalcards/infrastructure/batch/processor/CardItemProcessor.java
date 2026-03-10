@@ -17,7 +17,9 @@ public class CardItemProcessor implements ItemProcessor<Card, CardDto> {
 
     @Override
     public CardDto process(Card card) throws Exception {
-        log.debug("Transforming card to DTO: {}", card.getCardId());
+        if (log.isDebugEnabled()) {
+            log.debug("Transforming card to DTO: {}", card.getCardId());
+        }
         return cardMapper.toDto(card);
     }
 }

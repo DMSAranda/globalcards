@@ -1,131 +1,83 @@
 package com.bank.globalcards.infrastructure.batch.reader;
 
-import com.bank.globalcards.domain.enums.CardStatus;
 import com.bank.globalcards.domain.models.Card;
 import com.bank.globalcards.infrastructure.s3.S3Properties;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ExecutionContext;
+import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemStream;
 import org.springframework.batch.item.ItemStreamException;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 
 import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 
 @Slf4j
+@RequiredArgsConstructor
 public class S3CardItemReader implements ItemReader<Card>, ItemStream {
 
     private final S3Client s3Client;
     private final S3Properties s3Properties;
     private final String fileName;
-    private final int start;
-    private final int end;
+    private final long startByte;
+    private final long endByte;
 
     private BufferedReader reader;
-    private int currentLine = 0;
-    private boolean headerSkipped = false;
-
-    public S3CardItemReader(S3Client s3Client,
-                            S3Properties s3Properties,
-                            String fileName,
-                            int start,
-                            int end) {
-        this.s3Client = s3Client;
-        this.s3Properties = s3Properties;
-        this.fileName = fileName;
-        this.start = start;
-        this.end = end;
-    }
+    private boolean firstLineSkipped = false;
 
     @Override
     public void open(ExecutionContext executionContext) throws ItemStreamException {
         try {
-            String inputKey = s3Properties.getS3().getInputFolder() + fileName;
+
+            String key = s3Properties.getS3().getInputFolder() + fileName;
 
             GetObjectRequest request = GetObjectRequest.builder()
                     .bucket(s3Properties.getS3().getBucket())
-                    .key(inputKey)
+                    .key(key)
+                    .range("bytes=" + startByte + "-" + endByte)
                     .build();
 
             InputStream inputStream = s3Client.getObject(request);
+
             reader = new BufferedReader(new InputStreamReader(inputStream));
 
-            log.info("S3CardItemReader abierto para rango {} - {}", start, end);
+            log.info("Reader opened for bytes {} - {}", startByte, endByte);
 
         } catch (Exception e) {
-            throw new ItemStreamException("Error abriendo reader S3", e);
+            throw new ItemStreamException("Error opening S3 reader", e);
         }
     }
 
     @Override
     public Card read() throws Exception {
 
-        if (reader == null) {
+        String line = reader.readLine();
+
+        if (line == null) {
             return null;
         }
 
-        String line;
-
-        while ((line = reader.readLine()) != null) {
-
-            currentLine++;
-
-            // Saltar header solo una vez
-            if (!headerSkipped) {
-                headerSkipped = true;
-                if (line.toLowerCase().contains("cardid")) {
-                    continue;
-                }
-            }
-
-            // Saltar hasta llegar al inicio de la partición
-            if (currentLine < start) {
-                continue;
-            }
-
-            // Parar cuando superamos el rango
-            if (currentLine > end) {
-                return null;
-            }
-
-            try {
-                return parseCardFromLine(line, currentLine);
-            } catch (Exception e) {
-                log.warn("Error parseando línea {}: {}", currentLine, e.getMessage());
-            }
+        if (!firstLineSkipped && startByte > 0) {
+            firstLineSkipped = true;
+            line = reader.readLine();
+            if (line == null) return null;
         }
 
-        return null;
+        return parseLine(line);
     }
 
-    @Override
-    public void close() throws ItemStreamException {
-        try {
-            if (reader != null) {
-                reader.close();
-            }
-        } catch (Exception e) {
-            throw new ItemStreamException("Error cerrando reader S3", e);
-        }
-    }
-
-    private Card parseCardFromLine(String line, int lineNumber) {
+    private Card parseLine(String line) {
 
         String[] fields = line.split(",");
-
-        if (fields.length < 3) {
-            log.warn("Formato inválido en línea {}: {}", lineNumber, line);
-            return null;
-        }
 
         return Card.builder()
                 .cardId(fields[0].trim())
                 .pan(fields[1].trim())
                 .holder(fields[2].trim())
-                .status(CardStatus.PENDING)
+                .status(com.bank.globalcards.domain.enums.CardStatus.PENDING)
                 .build();
     }
 }

@@ -4,5 +4,6 @@ public enum CardStatus {
     CREATED,
     VALIDATED,
     PROCESSED,
-    ERROR
+    ERROR,
+    PENDING
 }
