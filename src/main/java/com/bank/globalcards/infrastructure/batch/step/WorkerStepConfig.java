@@ -2,6 +2,7 @@ package com.bank.globalcards.infrastructure.batch.step;
 
 import com.bank.globalcards.application.dtos.CardDto;
 import com.bank.globalcards.domain.models.Card;
+import com.bank.globalcards.infrastructure.batch.listener.BatchSkipListener;
 import com.bank.globalcards.infrastructure.batch.listener.BatchStepExecutionListener;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Step;
@@ -24,7 +25,9 @@ public class WorkerStepConfig {
     private final ItemReader<Card> reader;
     private final ItemProcessor<Card, CardDto> processor;
     private final ItemWriter<CardDto> writer;
+
     private final BatchStepExecutionListener batchStepExecutionListener;
+    private final BatchSkipListener batchSkipListener;
 
     @Bean
     public Step workerStep() {
@@ -40,6 +43,7 @@ public class WorkerStepConfig {
                 .skip(Exception.class)
                 .skipLimit(50)
                 .listener(batchStepExecutionListener)
+                .listener(batchSkipListener)
                 .build();
     }
 }
