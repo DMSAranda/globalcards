@@ -80,3 +80,15 @@ management:
   endpoint:
     health:
       show-details: always
+
+  metrics:
+    tags:
+      application: globalcards
+    distribution:
+      percentiles-histogram:
+        batch.chunk.processing.time: true
+
+  prometheus:
+    metrics:
+      export:
+        enabled: true

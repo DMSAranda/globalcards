@@ -57,6 +57,8 @@ public class S3FilePartitioner implements Partitioner {
 
             context.putLong("endByte", end);
 
+            context.putInt("partitionIndex", i);
+
             partitions.put("partition-" + i, context);
 
             log.info("Partition {} -> {} - {}", i, start, end);

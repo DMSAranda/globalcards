@@ -1,5 +1,6 @@
 package com.bank.globalcards.infrastructure.batch.config;
 
+import com.bank.globalcards.application.services.BatchMetricsService;
 import com.bank.globalcards.application.services.CardEventService;
 import com.bank.globalcards.application.services.CardStorageService;
 import com.bank.globalcards.application.services.CardValidationService;
@@ -18,7 +19,7 @@ public class WriterConfig {
     private final CardValidationService validationService;
     private final CardStorageService storageService;
     private final CardEventService eventService;
-    private final CardMapper cardMapper;
+    private final BatchMetricsService metricsService;
 
     @Bean
     @StepScope
@@ -31,6 +32,7 @@ public class WriterConfig {
                 validationService,
                 storageService,
                 eventService,
+                metricsService,
                 fileName,
                 batchId,
                 partitionIndex

@@ -16,6 +16,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 @RequiredArgsConstructor
 public class MasterStepConfig {
 
+    private static final int GRID_SIZE = 4;
+
     private final JobRepository jobRepository;
     private final PlatformTransactionManager transactionManager;
 
@@ -30,7 +32,7 @@ public class MasterStepConfig {
 
         partitionHandler.setTaskExecutor(taskExecutor);
         partitionHandler.setStep(workerStep);
-        partitionHandler.setGridSize(4);
+        partitionHandler.setGridSize(GRID_SIZE);
 
         return new StepBuilder("masterStep", jobRepository)
                 .partitioner(workerStep.getName(), partitioner)
