@@ -19,7 +19,6 @@ public class MasterStepConfig {
     private static final int GRID_SIZE = 4;
 
     private final JobRepository jobRepository;
-    private final PlatformTransactionManager transactionManager;
 
     private final Step workerStep;
     private final S3FilePartitioner partitioner;

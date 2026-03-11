@@ -32,7 +32,7 @@ public class CardEventService {
                 .forEach(cardEventPublisher::publishCardKo);
     }
 
-    public void publishError(CardDto card, String batchId, String fileName, int partNumber, String errorType, String message) {
+    public void publishDlq(CardDto card, String batchId, String fileName, int partNumber, String errorType, String message) {
 
         CardEvent event = new CardEvent(
                 card.getCardId(),
@@ -46,7 +46,7 @@ public class CardEventService {
                 Instant.now()
         );
 
-        cardEventPublisher.publishCardError(event);
+        cardEventPublisher.publishCardDlq(event);
     }
 
     private CardEvent buildEvent(CardDto card,

@@ -13,7 +13,7 @@ public record CardEvent(
         String source,
         String batchId,
         String fileName,
-        int partNumber,
+        int partitionNumber,
         Instant timestamp
 ) {}
 

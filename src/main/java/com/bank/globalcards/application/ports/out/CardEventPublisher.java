@@ -5,5 +5,5 @@ import com.bank.globalcards.domain.records.CardEvent;
 public interface CardEventPublisher {
     void publishCardOk(CardEvent event);
     void publishCardKo(CardEvent event);
-    void publishCardError(CardEvent event);
+    void publishCardDlq(CardEvent event);
 }

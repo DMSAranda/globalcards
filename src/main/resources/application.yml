@@ -19,6 +19,13 @@ spring:
         batch.size: 16384
         delivery.timeout.ms: 120000
         request.timeout.ms: 30000
+        max.in.flight.requests.per.connection: 5
+        buffer.memory: 33554432
+
+    topics:
+      cards-ok: cards.ok
+      cards-ko: cards.ko
+      cards-dlq: cards.dlq
 
   datasource:
     url: jdbc:postgresql://localhost:5432/globalcards

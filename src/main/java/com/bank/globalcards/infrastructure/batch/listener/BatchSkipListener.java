@@ -38,7 +38,7 @@ public class BatchSkipListener implements SkipListener<CardDto, CardDto> {
         String batchId =
                 stepExecution.getJobParameters().getString("batchId");
 
-        eventService.publishError(
+        eventService.publishDlq(
                 item,
                 batchId,
                 fileName,
@@ -64,7 +64,7 @@ public class BatchSkipListener implements SkipListener<CardDto, CardDto> {
         String batchId =
                 stepExecution.getJobParameters().getString("batchId");
 
-        eventService.publishError(
+        eventService.publishDlq(
                 item,
                 batchId,
                 fileName,
