@@ -1,5 +1,6 @@
 package com.bank.globalcards.application.services;
 
+import com.bank.globalcards.application.dtos.CardDto;
 import com.bank.globalcards.application.ports.out.CardEventPublisher;
 import com.bank.globalcards.domain.enums.CardStatus;
 import com.bank.globalcards.domain.models.Card;
@@ -16,9 +17,9 @@ public class CardEventService {
 
     private final CardEventPublisher cardEventPublisher;
 
-    public void publishOk(List<Card> cards, String batchId, String fileName, int partNumber) {
+    public void publishOk(List<CardDto> cards, String batchId, String fileName, int partNumber) {
 
-        for (Card card : cards) {
+        for (CardDto card : cards) {
 
             CardEvent event = new CardEvent(
                     card.getCardId(),
@@ -36,9 +37,9 @@ public class CardEventService {
         }
     }
 
-    public void publishKo(List<Card> cards, String batchId, String fileName, int partNumber) {
+    public void publishKo(List<CardDto> cards, String batchId, String fileName, int partNumber) {
 
-        for (Card card : cards) {
+        for (CardDto card : cards) {
 
             CardEvent event = new CardEvent(
                     card.getCardId(),

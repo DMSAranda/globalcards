@@ -1,13 +1,16 @@
 package com.bank.globalcards.application.dtos;
 
-import lombok.Builder;
-import lombok.Data;
+import com.bank.globalcards.domain.enums.CardStatus;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class CardDto {
     private String cardId;
     private String pan;
     private String holder;
-    private String status;
+    private CardStatus status;
 }

@@ -31,7 +31,6 @@ public class WriterConfig {
                 validationService,
                 storageService,
                 eventService,
-                cardMapper,
                 fileName,
                 batchId,
                 partitionIndex

@@ -1,5 +1,6 @@
 package com.bank.globalcards.infrastructure.batch.job;
 
+import com.bank.globalcards.infrastructure.batch.listener.BatchJobExecutionListener;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -14,11 +15,13 @@ public class CardProcessingJobConfig {
 
     private final JobRepository jobRepository;
     private final Step masterStep;
+    private final BatchJobExecutionListener batchJobExecutionListener;
 
     @Bean
     public Job cardProcessingJob() {
 
         return new JobBuilder("cardProcessingJob", jobRepository)
+                .listener(batchJobExecutionListener)
                 .start(masterStep)
                 .build();
     }

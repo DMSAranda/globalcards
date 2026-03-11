@@ -1,6 +1,8 @@
 package com.bank.globalcards.infrastructure.batch.step;
 
+import com.bank.globalcards.application.dtos.CardDto;
 import com.bank.globalcards.domain.models.Card;
+import com.bank.globalcards.infrastructure.batch.listener.BatchStepExecutionListener;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.step.builder.StepBuilder;
@@ -20,17 +22,24 @@ public class WorkerStepConfig {
     private final PlatformTransactionManager transactionManager;
 
     private final ItemReader<Card> reader;
-    private final ItemProcessor<Card, Card> processor;
-    private final ItemWriter<Card> writer;
+    private final ItemProcessor<Card, CardDto> processor;
+    private final ItemWriter<CardDto> writer;
+    private final BatchStepExecutionListener batchStepExecutionListener;
 
     @Bean
     public Step workerStep() {
 
         return new StepBuilder("workerStep", jobRepository)
-                .<Card, Card>chunk(1000, transactionManager)
+                .<Card, CardDto>chunk(1000, transactionManager)
                 .reader(reader)
                 .processor(processor)
                 .writer(writer)
+                .faultTolerant()
+                .retry(Exception.class)
+                .retryLimit(3)
+                .skip(Exception.class)
+                .skipLimit(50)
+                .listener(batchStepExecutionListener)
                 .build();
     }
 }
