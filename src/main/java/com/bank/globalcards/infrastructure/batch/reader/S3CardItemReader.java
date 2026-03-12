@@ -1,5 +1,7 @@
 package com.bank.globalcards.infrastructure.batch.reader;
 
+import com.bank.globalcards.application.dtos.CardDto;
+import com.bank.globalcards.domain.enums.CardStatus;
 import com.bank.globalcards.domain.models.Card;
 import com.bank.globalcards.infrastructure.s3.S3Properties;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +19,7 @@ import java.io.InputStreamReader;
 
 @Slf4j
 @RequiredArgsConstructor
-public class S3CardItemReader implements ItemReader<Card>, ItemStream {
+public class S3CardItemReader implements ItemReader<CardDto>, ItemStream {
 
     private final S3Client s3Client;
     private final S3Properties s3Properties;
@@ -52,7 +54,7 @@ public class S3CardItemReader implements ItemReader<Card>, ItemStream {
     }
 
     @Override
-    public Card read() throws Exception {
+    public CardDto read() throws Exception {
 
         String line = reader.readLine();
 
@@ -69,15 +71,32 @@ public class S3CardItemReader implements ItemReader<Card>, ItemStream {
         return parseLine(line);
     }
 
-    private Card parseLine(String line) {
+    private CardDto parseLine(String line) {
 
         String[] fields = line.split(",");
 
-        return Card.builder()
+        if (fields.length < 3) {
+            log.warn("Invalid line skipped: {}", line);
+            return null;
+        }
+
+        return CardDto.builder()
                 .cardId(fields[0].trim())
                 .pan(fields[1].trim())
                 .holder(fields[2].trim())
-                .status(com.bank.globalcards.domain.enums.CardStatus.PENDING)
+                .status(CardStatus.PENDING)
                 .build();
+    }
+
+    @Override
+    public void close() throws ItemStreamException {
+
+        try {
+            if (reader != null) {
+                reader.close();
+            }
+        } catch (Exception e) {
+            throw new ItemStreamException("Error closing S3 reader", e);
+        }
     }
 }

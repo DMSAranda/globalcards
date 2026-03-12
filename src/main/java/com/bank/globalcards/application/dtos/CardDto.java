@@ -4,8 +4,6 @@ import com.bank.globalcards.domain.enums.CardStatus;
 import lombok.*;
 
 @Getter
-@Setter
-@NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class CardDto {

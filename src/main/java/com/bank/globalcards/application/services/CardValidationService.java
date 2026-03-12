@@ -8,23 +8,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class CardValidationService {
 
-    public boolean isValid(CardDto card) {
+    public boolean isValid(Card card) {
 
         if (card.getPan() == null || card.getPan().length() < 13) {
             return false;
         }
 
         return true;
-    }
-
-    public CardDto validate(CardDto card) {
-
-        if (isValid(card)) {
-            card.setStatus(CardStatus.VALIDATED);
-        } else {
-            card.setStatus(CardStatus.ERROR);
-        }
-
-        return card;
     }
 }

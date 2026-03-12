@@ -11,15 +11,15 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class CardItemProcessor implements ItemProcessor<Card, CardDto> {
+public class CardItemProcessor implements ItemProcessor<CardDto, Card> {
 
     private final CardMapper cardMapper;
 
     @Override
-    public CardDto process(Card card) throws Exception {
+    public Card process(CardDto card) throws Exception {
         if (log.isDebugEnabled()) {
             log.debug("Transforming card to DTO: {}", card.getCardId());
         }
-        return cardMapper.toDto(card);
+        return cardMapper.toDomain(card);
     }
 }

@@ -3,6 +3,7 @@ package com.bank.globalcards.application.services;
 import com.bank.globalcards.application.dtos.CardDto;
 import com.bank.globalcards.application.ports.out.CardEventPublisher;
 import com.bank.globalcards.domain.enums.CardStatus;
+import com.bank.globalcards.domain.models.Card;
 import com.bank.globalcards.domain.records.CardEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,14 +19,14 @@ public class CardEventService {
 
     private final CardEventPublisher cardEventPublisher;
 
-    public void publishOk(List<CardDto> cards, String batchId, String fileName, int partNumber) {
+    public void publishOk(List<Card> cards, String batchId, String fileName, int partNumber) {
 
         cards.stream()
                 .map(card -> buildEvent(card, CardStatus.PROCESSED, batchId, fileName, partNumber))
                 .forEach(cardEventPublisher::publishCardOk);
     }
 
-    public void publishKo(List<CardDto> cards, String batchId, String fileName, int partNumber) {
+    public void publishKo(List<Card> cards, String batchId, String fileName, int partNumber) {
 
         cards.stream()
                 .map(card -> buildEvent(card, CardStatus.ERROR, batchId, fileName, partNumber))
@@ -49,7 +50,7 @@ public class CardEventService {
         cardEventPublisher.publishCardDlq(event);
     }
 
-    private CardEvent buildEvent(CardDto card,
+    private CardEvent buildEvent(Card card,
                                  CardStatus status,
                                  String batchId,
                                  String fileName,

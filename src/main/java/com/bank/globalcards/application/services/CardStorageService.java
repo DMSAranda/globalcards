@@ -4,6 +4,7 @@ import com.bank.globalcards.application.dtos.CardDto;
 import com.bank.globalcards.application.ports.out.CardStoragePort;
 import com.bank.globalcards.domain.models.Card;
 import com.bank.globalcards.domain.models.CardUploadResult;
+import com.bank.globalcards.infrastructure.mapper.CardMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -14,10 +15,15 @@ import java.util.List;
 public class CardStorageService {
 
     private final CardStoragePort cardStoragePort;
+    private final CardMapper cardMapper;
 
-    public void storeChunk(List<CardDto> cards, String fileName, int partNumber) {
+    public void storeChunk(List<Card> cards, String fileName, int partNumber) {
 
-        cardStoragePort.uploadChunk(cards, fileName, partNumber);
+        List<CardDto> cardDtos = cards.stream()
+                        .map(cardMapper::toDto)
+                        .toList();
+
+        cardStoragePort.uploadChunk(cardDtos, fileName, partNumber);
 
     }
 }

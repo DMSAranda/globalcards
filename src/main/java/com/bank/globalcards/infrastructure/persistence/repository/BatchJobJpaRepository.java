@@ -1,4 +1,4 @@
-package com.bank.globalcards.infrastructure.persistence;
+package com.bank.globalcards.infrastructure.persistence.repository;
 
 import com.bank.globalcards.domain.models.BatchJob;
 import org.springframework.data.jpa.repository.JpaRepository;

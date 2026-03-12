@@ -1,9 +1,6 @@
 package com.bank.globalcards.infrastructure.batch.config;
 
-import com.bank.globalcards.application.services.BatchMetricsService;
-import com.bank.globalcards.application.services.CardEventService;
-import com.bank.globalcards.application.services.CardStorageService;
-import com.bank.globalcards.application.services.CardValidationService;
+import com.bank.globalcards.application.services.*;
 import com.bank.globalcards.infrastructure.batch.writer.CardItemWriter;
 import com.bank.globalcards.infrastructure.mapper.CardMapper;
 import lombok.RequiredArgsConstructor;
@@ -16,10 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 @RequiredArgsConstructor
 public class WriterConfig {
 
-    private final CardValidationService validationService;
-    private final CardStorageService storageService;
-    private final CardEventService eventService;
-    private final BatchMetricsService metricsService;
+    private final CardBatchService cardBatchService;
 
     @Bean
     @StepScope
@@ -29,10 +23,7 @@ public class WriterConfig {
             @Value("#{stepExecutionContext['partitionIndex']}") Integer partitionIndex) {
 
         return new CardItemWriter(
-                validationService,
-                storageService,
-                eventService,
-                metricsService,
+                cardBatchService,
                 fileName,
                 batchId,
                 partitionIndex

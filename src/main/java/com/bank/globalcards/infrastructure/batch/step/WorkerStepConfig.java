@@ -22,9 +22,9 @@ public class WorkerStepConfig {
     private final JobRepository jobRepository;
     private final PlatformTransactionManager transactionManager;
 
-    private final ItemReader<Card> reader;
-    private final ItemProcessor<Card, CardDto> processor;
-    private final ItemWriter<CardDto> writer;
+    private final ItemReader<CardDto> reader;
+    private final ItemProcessor<CardDto, Card> processor;
+    private final ItemWriter<Card> writer;
 
     private final BatchStepExecutionListener batchStepExecutionListener;
     private final BatchSkipListener batchSkipListener;
@@ -33,7 +33,7 @@ public class WorkerStepConfig {
     public Step workerStep() {
 
         return new StepBuilder("workerStep", jobRepository)
-                .<Card, CardDto>chunk(1000, transactionManager)
+                .<CardDto, Card>chunk(1000, transactionManager)
                 .reader(reader)
                 .processor(processor)
                 .writer(writer)
