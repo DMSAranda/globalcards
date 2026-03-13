@@ -1,10 +1,9 @@
 package com.bank.globalcards.infrastructure.persistence.adapter;
 
-import com.bank.globalcards.application.dtos.CardDto;
 import com.bank.globalcards.application.ports.out.CardRepository;
 import com.bank.globalcards.domain.models.Card;
 import com.bank.globalcards.domain.enums.CardStatus;
-import com.bank.globalcards.infrastructure.mapper.CardMapper;
+import com.bank.globalcards.application.mapper.CardMapper;
 import com.bank.globalcards.infrastructure.persistence.entity.CardEntity;
 import com.bank.globalcards.infrastructure.persistence.repository.JpaCardRepository;
 import lombok.RequiredArgsConstructor;

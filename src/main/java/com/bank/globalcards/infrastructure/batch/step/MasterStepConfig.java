@@ -16,7 +16,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 @RequiredArgsConstructor
 public class MasterStepConfig {
 
-    private static final int GRID_SIZE = 4;
+    private static final int GRID_SIZE = 10;
 
     private final JobRepository jobRepository;
 

@@ -2,7 +2,6 @@ package com.bank.globalcards.infrastructure.batch.config;
 
 import com.bank.globalcards.application.services.*;
 import com.bank.globalcards.infrastructure.batch.writer.CardItemWriter;
-import com.bank.globalcards.infrastructure.mapper.CardMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.context.annotation.Bean;

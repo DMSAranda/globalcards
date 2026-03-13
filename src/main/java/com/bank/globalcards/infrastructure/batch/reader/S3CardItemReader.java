@@ -2,51 +2,66 @@ package com.bank.globalcards.infrastructure.batch.reader;
 
 import com.bank.globalcards.application.dtos.CardDto;
 import com.bank.globalcards.domain.enums.CardStatus;
-import com.bank.globalcards.domain.models.Card;
 import com.bank.globalcards.infrastructure.s3.S3Properties;
+import com.bank.globalcards.infrastructure.s3.S3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemStream;
 import org.springframework.batch.item.ItemStreamException;
-import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 
 @Slf4j
 @RequiredArgsConstructor
 public class S3CardItemReader implements ItemReader<CardDto>, ItemStream {
 
-    private final S3Client s3Client;
+    private final S3Service s3Service;
     private final S3Properties s3Properties;
+
     private final String fileName;
     private final long startByte;
     private final long endByte;
 
     private BufferedReader reader;
-    private boolean firstLineSkipped = false;
+
+    private long currentBytePosition;
+    private boolean finished = false;
 
     @Override
     public void open(ExecutionContext executionContext) throws ItemStreamException {
+
         try {
 
             String key = s3Properties.getS3().getInputFolder() + fileName;
 
-            GetObjectRequest request = GetObjectRequest.builder()
-                    .bucket(s3Properties.getS3().getBucket())
-                    .key(key)
-                    .range("bytes=" + startByte + "-" + endByte)
-                    .build();
+            log.info(
+                    "Opening S3 reader for file {} (bytes {} - {})",
+                    fileName, startByte, endByte
+            );
 
-            InputStream inputStream = s3Client.getObject(request);
+            InputStream inputStream =
+                    s3Service.downloadFileRange(key, startByte, endByte + 8192);
 
-            reader = new BufferedReader(new InputStreamReader(inputStream));
+            reader = new BufferedReader(
+                    new InputStreamReader(inputStream, StandardCharsets.UTF_8),
+                    262144 // 256 KB buffer
+            );
 
-            log.info("Reader opened for bytes {} - {}", startByte, endByte);
+            currentBytePosition = startByte;
+
+            if (startByte > 0) {
+
+                String skipped = reader.readLine();
+
+                if (skipped != null) {
+                    currentBytePosition += skipped.length() + 1;
+                }
+            }
 
         } catch (Exception e) {
             throw new ItemStreamException("Error opening S3 reader", e);
@@ -56,16 +71,21 @@ public class S3CardItemReader implements ItemReader<CardDto>, ItemStream {
     @Override
     public CardDto read() throws Exception {
 
-        String line = reader.readLine();
-
-        if (line == null) {
+        if (finished) {
             return null;
         }
 
-        if (!firstLineSkipped && startByte > 0) {
-            firstLineSkipped = true;
-            line = reader.readLine();
-            if (line == null) return null;
+        String line = reader.readLine();
+
+        if (line == null) {
+            finished = true;
+            return null;
+        }
+
+        currentBytePosition += line.length() + 1;
+
+        if (currentBytePosition > endByte) {
+            finished = true;
         }
 
         return parseLine(line);
@@ -73,17 +93,28 @@ public class S3CardItemReader implements ItemReader<CardDto>, ItemStream {
 
     private CardDto parseLine(String line) {
 
-        String[] fields = line.split(",");
+        int firstComma = line.indexOf(',');
 
-        if (fields.length < 3) {
-            log.warn("Invalid line skipped: {}", line);
+        if (firstComma == -1) {
+            log.warn("Invalid CSV line skipped: {}", line);
             return null;
         }
 
+        int secondComma = line.indexOf(',', firstComma + 1);
+
+        if (secondComma == -1) {
+            log.warn("Invalid CSV line skipped: {}", line);
+            return null;
+        }
+
+        String cardId = line.substring(0, firstComma);
+        String pan = line.substring(firstComma + 1, secondComma);
+        String holder = line.substring(secondComma + 1);
+
         return CardDto.builder()
-                .cardId(fields[0].trim())
-                .pan(fields[1].trim())
-                .holder(fields[2].trim())
+                .cardId(cardId)
+                .pan(pan)
+                .holder(holder)
                 .status(CardStatus.PENDING)
                 .build();
     }
@@ -92,9 +123,11 @@ public class S3CardItemReader implements ItemReader<CardDto>, ItemStream {
     public void close() throws ItemStreamException {
 
         try {
+
             if (reader != null) {
                 reader.close();
             }
+
         } catch (Exception e) {
             throw new ItemStreamException("Error closing S3 reader", e);
         }

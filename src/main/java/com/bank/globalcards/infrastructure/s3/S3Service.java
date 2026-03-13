@@ -40,16 +40,26 @@ public class S3Service {
         return s3Client.getObject(request);
     }
 
-    public void uploadFile(String fileName, byte[] content) {
+    public InputStream downloadFileRange(String key, long startByte, long endByte) {
+
+        GetObjectRequest request = GetObjectRequest.builder()
+                .bucket(s3Properties.getS3().getBucket())
+                .key(key)
+                .range("bytes=" + startByte + "-" + endByte)
+                .build();
+
+        return s3Client.getObject(request);
+    }
+
+    public void uploadFile(String fileName, InputStream content, long contentLength) {
         String outputKey = s3Properties.getS3().getOutputFolder() + fileName;
-        
+
         PutObjectRequest request = PutObjectRequest.builder()
                 .bucket(s3Properties.getS3().getBucket())
                 .key(outputKey)
                 .build();
 
-        s3Client.putObject(request, RequestBody.fromBytes(content));
-        log.info("File uploaded successfully: {}", outputKey);
+        s3Client.putObject(request, RequestBody.fromInputStream(content, contentLength));
     }
 
     public void moveFile(String sourceKey, String destinationKey) {

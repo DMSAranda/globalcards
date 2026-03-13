@@ -2,7 +2,7 @@ package com.bank.globalcards.infrastructure.batch.processor;
 
 import com.bank.globalcards.application.dtos.CardDto;
 import com.bank.globalcards.domain.models.Card;
-import com.bank.globalcards.infrastructure.mapper.CardMapper;
+import com.bank.globalcards.application.mapper.CardMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.item.ItemProcessor;
@@ -16,10 +16,10 @@ public class CardItemProcessor implements ItemProcessor<CardDto, Card> {
     private final CardMapper cardMapper;
 
     @Override
-    public Card process(CardDto card) throws Exception {
+    public Card process(CardDto cardDto) throws Exception {
         if (log.isDebugEnabled()) {
-            log.debug("Transforming card to DTO: {}", card.getCardId());
+            log.debug("Transforming card to DTO: {}", cardDto.getCardId());
         }
-        return cardMapper.toDomain(card);
+        return cardMapper.toDomain(cardDto);
     }
 }

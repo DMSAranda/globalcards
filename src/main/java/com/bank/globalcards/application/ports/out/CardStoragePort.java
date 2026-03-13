@@ -8,6 +8,5 @@ import java.util.List;
 
 public interface CardStoragePort {
 
-    CardUploadResult uploadChunk(List<CardDto> cards, String fileName, int partNumber);
-
+    CardUploadResult uploadChunk(List<String> lines, String fileName, int partNumber);
 }
