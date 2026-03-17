@@ -16,13 +16,13 @@ public class CardStorageService {
     private final CardStoragePort cardStoragePort;
     private final RedsysFormatter redsysFormatter;
 
-    public void storeChunk(List<Card> cards, String fileName, int partNumber) {
+    public void storeChunk(List<Card> cards, String fileName, int partitionNumber) {
 
         List<String> lines = cards.stream()
                 .map(redsysFormatter::format)
                 .toList();
 
-        cardStoragePort.uploadChunk(lines, fileName, partNumber);
+        cardStoragePort.uploadChunk(lines, fileName, partitionNumber);
 
     }
 }

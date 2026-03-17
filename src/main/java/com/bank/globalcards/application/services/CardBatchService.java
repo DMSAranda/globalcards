@@ -23,7 +23,7 @@ public class CardBatchService {
             List<Card> cards,
             String fileName,
             String batchId,
-            Integer partitionIndex
+            Integer partitionNumber
     ) {
 
         Map<Boolean, List<Card>> partitionedCards =
@@ -35,20 +35,20 @@ public class CardBatchService {
 
         if (!validCards.isEmpty()) {
 
-            persistenceService.saveAll(validCards);
+            persistenceService.saveAll(validCards, fileName, batchId, partitionNumber);
 
-            storageService.storeChunk(validCards, fileName, partitionIndex);
+            storageService.storeChunk(validCards, fileName, partitionNumber);
 
-            eventService.publishOk(validCards, batchId, fileName, partitionIndex);
+            eventService.publishOk(validCards, batchId, fileName, partitionNumber);
 
-            metricsService.incrementValid(validCards.size(), partitionIndex);
+            metricsService.incrementValid(validCards.size(), partitionNumber);
         }
 
         if (!invalidCards.isEmpty()) {
 
-            eventService.publishKo(invalidCards, batchId, fileName, partitionIndex);
+            eventService.publishKo(invalidCards, batchId, fileName, partitionNumber);
 
-            metricsService.incrementInvalid(invalidCards.size(), partitionIndex);
+            metricsService.incrementInvalid(invalidCards.size(), partitionNumber);
         }
     }
 }

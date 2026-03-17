@@ -20,19 +20,19 @@ public class CardRepositoryAdapter implements CardRepository {
     private final CardMapper mapper;
 
     @Override
-    public Card save(Card card) {
+    public Card save(Card card, String fileName, String batchId, Integer partitionNumber) {
 
-        CardEntity entity = mapper.toEntity(card);
+        CardEntity entity = mapper.toEntity(card, fileName, batchId, partitionNumber);
         CardEntity saved = jpaRepository.save(entity);
 
         return mapper.toDomain(saved);
     }
 
     @Override
-    public List<Card> saveAll(List<Card> cards) {
+    public List<Card> saveAll(List<Card> cards, String fileName, String batchId, Integer partitionNumber) {
 
         List<CardEntity> entities = cards.stream()
-                .map(mapper::toEntity)
+                .map(card -> mapper.toEntity(card, fileName, batchId, partitionNumber))
                 .toList();
 
         List<CardEntity> saved = jpaRepository.saveAll(entities);

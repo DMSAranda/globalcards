@@ -14,9 +14,9 @@ public class CardPersistenceService {
 
     private final CardRepository cardRepository;
 
-    public void saveAll(List<Card> cards) {
+    public void saveAll(List<Card> cards, String fileName, String batchId, Integer partitionNumber) {
 
-        cardRepository.saveAll(cards);
+        cardRepository.saveAll(cards, fileName, batchId, partitionNumber);
     }
 
 }
