@@ -1,14 +1,12 @@
 package com.bank.globalcards.domain.exceptions;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 /**
  * Excepción lanzada cuando ocurre un error durante el parsing de archivos CSV.
  * Representa errores específicos del formato CSV, estructura de datos o parsing.
  */
 @Getter
-@RequiredArgsConstructor
 public class CsvParsingException extends CardProcessingException {
     
     private final Integer lineNumber;

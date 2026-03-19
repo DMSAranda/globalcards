@@ -2,6 +2,7 @@ package com.bank.globalcards.infrastructure.batch.listener;
 
 import com.bank.globalcards.application.dtos.CardDto;
 import com.bank.globalcards.application.services.CardEventService;
+import com.bank.globalcards.domain.models.Card;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.SkipListener;
@@ -13,7 +14,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class BatchSkipListener implements SkipListener<CardDto, CardDto> {
+public class BatchSkipListener implements SkipListener<CardDto, Card> {
 
     private final CardEventService eventService;
 
@@ -49,7 +50,7 @@ public class BatchSkipListener implements SkipListener<CardDto, CardDto> {
     }
 
     @Override
-    public void onSkipInWrite(CardDto item, Throwable t) {
+    public void onSkipInWrite(Card item, Throwable t) {
 
         log.error("Error writing card {}", item, t);
 
@@ -64,8 +65,15 @@ public class BatchSkipListener implements SkipListener<CardDto, CardDto> {
         String batchId =
                 stepExecution.getJobParameters().getString("batchId");
 
+        CardDto dto = CardDto.builder()
+                .cardId(item.getCardId())
+                .pan(item.getPan())
+                .holder(item.getHolder())
+                .status(item.getStatus())
+                .build();
+
         eventService.publishDlq(
-                item,
+                dto,
                 batchId,
                 fileName,
                 partitionIndex,

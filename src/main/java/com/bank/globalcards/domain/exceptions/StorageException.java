@@ -1,14 +1,12 @@
 package com.bank.globalcards.domain.exceptions;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 /**
  * Excepción lanzada cuando ocurre un error durante operaciones de almacenamiento.
  * Representa errores relacionados con persistencia de datos, base de datos o almacenamiento.
  */
 @Getter
-@RequiredArgsConstructor
 public class StorageException extends CardProcessingException {
     
     private final String operation;

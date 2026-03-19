@@ -1,14 +1,12 @@
 package com.bank.globalcards.domain.exceptions;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 /**
  * Excepción lanzada cuando ocurre un error durante la publicación de eventos.
  * Representa errores relacionados con Kafka, mensajería o sistemas de eventos.
  */
 @Getter
-@RequiredArgsConstructor
 public class EventPublishingException extends CardProcessingException {
     
     private final String eventType;

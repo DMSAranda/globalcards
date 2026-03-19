@@ -1,14 +1,12 @@
 package com.bank.globalcards.domain.exceptions;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 /**
  * Excepción lanzada cuando una tarjeta no cumple las reglas de validación del dominio.
  * Representa errores de validación de negocio: formato, longitud, checksum, etc.
  */
 @Getter
-@RequiredArgsConstructor
 public class CardValidationException extends CardProcessingException {
     
     private final String cardId;

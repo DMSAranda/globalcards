@@ -1,14 +1,12 @@
 package com.bank.globalcards.domain.exceptions;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 /**
  * Excepción lanzada cuando ocurre un error en servicios externos.
  * Representa errores relacionados con S3, Kafka, bases de datos externas o APIs de terceros.
  */
 @Getter
-@RequiredArgsConstructor
 public class ExternalServiceException extends CardProcessingException {
     
     private final String serviceName;

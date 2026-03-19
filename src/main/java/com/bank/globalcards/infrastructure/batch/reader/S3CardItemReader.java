@@ -79,13 +79,19 @@ public class S3CardItemReader implements ItemReader<CardDto>, ItemStream {
             return null;
         }
 
-        try {
+        // Importante: no devolvemos null por una línea inválida,
+        // porque `null` en un ItemReader significa fin del input.
+        while (true) {
             String line = reader.readLine();
-            
+
             if (line == null) {
                 finished = true;
-                log.info("End of file reached for {}. Valid records: {}, Invalid records: {}", 
-                        fileName, validRecords, invalidRecords);
+                log.info(
+                        "End of file reached for {}. Valid records: {}, Invalid records: {}",
+                        fileName,
+                        validRecords,
+                        invalidRecords
+                );
                 return null;
             }
 
@@ -95,32 +101,39 @@ public class S3CardItemReader implements ItemReader<CardDto>, ItemStream {
             // Verificar si hemos alcanzado el límite de bytes para esta partición
             if (currentBytePosition > endByte) {
                 finished = true;
-                log.info("Byte limit reached for file {}. Valid records: {}, Invalid records: {}", 
-                        fileName, validRecords, invalidRecords);
+                log.info(
+                        "Byte limit reached for file {}. Valid records: {}, Invalid records: {}",
+                        fileName,
+                        validRecords,
+                        invalidRecords
+                );
                 return null;
             }
 
-            // Parsear la línea con el nuevo servicio de parsing
-            CardDto card = csvParsingService.parseCardFromCsvLine(line, lineNumber);
-            validRecords++;
+            try {
+                // Parsear la línea con el nuevo servicio de parsing
+                CardDto card = csvParsingService.parseCardFromCsvLine(line, lineNumber);
+                validRecords++;
 
-            if (log.isTraceEnabled()) {
-                log.trace("Successfully parsed line {}: cardId={}", lineNumber, card.getCardId());
+                if (log.isTraceEnabled()) {
+                    log.trace("Successfully parsed line {}: cardId={}", lineNumber, card.getCardId());
+                }
+
+                return card;
+            } catch (CsvParsingService.CsvParsingException e) {
+                invalidRecords++;
+                log.warn("Invalid CSV format at line {} in file {}: {}", lineNumber, fileName, e.getMessage());
+                // Saltar la línea inválida y continuar leyendo.
+            } catch (Exception e) {
+                log.error(
+                        "Unexpected error reading line {} from file {}: {}",
+                        lineNumber,
+                        fileName,
+                        e.getMessage(),
+                        e
+                );
+                throw e;
             }
-
-            return card;
-
-        } catch (CsvParsingService.CsvParsingException e) {
-            invalidRecords++;
-            log.warn("Invalid CSV format at line {} in file {}: {}", lineNumber, fileName, e.getMessage());
-            
-            // Para líneas inválidas, devolvemos null para saltarlas
-            // El contador de registros inválidos se mantiene para estadísticas
-            return null;
-            
-        } catch (Exception e) {
-            log.error("Unexpected error reading line {} from file {}: {}", lineNumber, fileName, e.getMessage(), e);
-            throw e;
         }
     }
 

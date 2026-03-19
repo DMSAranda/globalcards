@@ -1,14 +1,12 @@
 package com.bank.globalcards.domain.exceptions;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 /**
  * Excepción lanzada cuando ocurre un error durante el procesamiento de un batch.
  * Representa errores relacionados con la ejecución, configuración o estado del batch.
  */
 @Getter
-@RequiredArgsConstructor
 public class BatchProcessingException extends CardProcessingException {
     
     private final String batchId;
