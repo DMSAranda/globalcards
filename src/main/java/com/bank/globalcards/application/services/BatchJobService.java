@@ -1,7 +1,7 @@
 package com.bank.globalcards.application.services;
 
 import com.bank.globalcards.application.ports.out.BatchJobRepository;
-import com.bank.globalcards.domain.models.BatchJob;
+import com.bank.globalcards.infrastructure.persistence.entity.BatchJob;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

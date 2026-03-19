@@ -1,7 +1,7 @@
 package com.bank.globalcards.infrastructure.persistence.adapter;
 
 import com.bank.globalcards.application.ports.out.BatchJobRepository;
-import com.bank.globalcards.domain.models.BatchJob;
+import com.bank.globalcards.infrastructure.persistence.entity.BatchJob;
 import com.bank.globalcards.infrastructure.persistence.repository.BatchJobJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

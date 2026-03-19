@@ -1,6 +1,6 @@
 package com.bank.globalcards.application.ports.out;
 
-import com.bank.globalcards.domain.models.BatchJob;
+import com.bank.globalcards.infrastructure.persistence.entity.BatchJob;
 
 import java.util.List;
 import java.util.Optional;

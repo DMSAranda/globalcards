@@ -70,6 +70,8 @@ aws:
 # Logging
 logging:
   level:
+    root: WARN
+    org.springframework: WARN
     com.bank.globalcards: DEBUG
     org.springframework.batch: DEBUG
     software.amazon.awssdk: INFO

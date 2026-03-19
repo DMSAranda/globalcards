@@ -1,4 +1,4 @@
-package com.bank.globalcards.domain.models;
+package com.bank.globalcards.infrastructure.persistence.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -32,13 +32,13 @@ public class BatchJob {
     private String status;
     
     @Column
-    private Integer totalRecords;
+    private Long totalRecords;
     
     @Column
-    private Integer processedRecords;
+    private Long processedRecords;
     
     @Column
-    private Integer failedRecords;
+    private Long failedRecords;
     
     @Column
     private Instant startTime;

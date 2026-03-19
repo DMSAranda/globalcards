@@ -1,43 +1,61 @@
 package com.bank.globalcards.infrastructure.batch.listener;
 
+import com.bank.globalcards.application.services.BatchJobService;
+import com.bank.globalcards.infrastructure.persistence.entity.BatchJob;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobExecutionListener;
-import org.springframework.batch.core.BatchStatus;
+import org.springframework.batch.core.StepExecution;
 import org.springframework.stereotype.Component;
 
-@Slf4j
+import java.time.Instant;
+import java.util.Optional;
+
 @Component
+@RequiredArgsConstructor
 public class BatchJobExecutionListener implements JobExecutionListener {
 
-    private long startTime;
+    private final BatchJobService batchJobService;
 
     @Override
     public void beforeJob(JobExecution jobExecution) {
+        BatchJob batchJob = BatchJob.builder()
+                .batchId(jobExecution.getJobId().toString())
+                .fileName(jobExecution.getJobInstance().getJobName())
+                .status("RUNNING")
+                .startTime(Instant.now())
+                .build();
 
-        startTime = System.currentTimeMillis();
-
-        log.info("======================================");
-        log.info("BATCH JOB STARTED");
-        log.info("JobName: {}", jobExecution.getJobInstance().getJobName());
-        log.info("JobId: {}", jobExecution.getJobId());
-        log.info("======================================");
+        batchJobService.create(batchJob);
     }
 
     @Override
     public void afterJob(JobExecution jobExecution) {
+        String batchId = jobExecution.getJobId().toString();
+        Optional<BatchJob> job = batchJobService.findByBatchId(batchId);
 
-        long duration = System.currentTimeMillis() - startTime;
+        if (job.isPresent()) {
+            BatchJob batchJob = job.get();
 
-        log.info("======================================");
-        log.info("BATCH JOB FINISHED");
-        log.info("Status: {}", jobExecution.getStatus());
-        log.info("Duration: {} ms", duration);
-        log.info("======================================");
+            batchJob.setTotalRecords(jobExecution.getStepExecutions().stream()
+                    .mapToLong(StepExecution::getReadCount)
+                    .sum());
+            batchJob.setProcessedRecords(jobExecution.getStepExecutions().stream()
+                    .mapToLong(StepExecution::getWriteCount)
+                    .sum());
+            batchJob.setFailedRecords(jobExecution.getStepExecutions().stream()
+                    .mapToLong(StepExecution::getSkipCount)
+                    .sum());
 
-        if (jobExecution.getStatus() == BatchStatus.FAILED) {
-            jobExecution.getAllFailureExceptions()
-                    .forEach(ex -> log.error("Batch error", ex));
+            if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
+                batchJob.markAsCompleted();
+            } else {
+                batchJob.markAsFailed("Job failed");
+            }
+            batchJobService.update(batchJob);
         }
     }
 }

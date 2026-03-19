@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 public class CardBatchService {
 
     private final CardValidationService validationService;
-    private final CardPersistenceService persistenceService;
     private final CardStorageService storageService;
     private final CardEventService eventService;
     private final BatchMetricsService metricsService;
@@ -34,8 +33,6 @@ public class CardBatchService {
         List<Card> invalidCards = partitionedCards.get(false);
 
         if (!validCards.isEmpty()) {
-
-            persistenceService.saveAll(validCards, fileName, batchId, partitionNumber);
 
             storageService.storeChunk(validCards, fileName, partitionNumber);
 
