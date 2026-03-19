@@ -26,6 +26,16 @@ public class BatchJobRepositoryAdapter implements BatchJobRepository {
     }
 
     @Override
+    public Optional<BatchJob> findByBatchIdAndFileName(String batchId, String fileName) {
+        return jpaRepository.findByBatchIdAndFileName(batchId, fileName);
+    }
+
+    @Override
+    public List<BatchJob> findByBatchIdOrderByFileNameAsc(String batchId) {
+        return jpaRepository.findByBatchIdOrderByFileNameAsc(batchId);
+    }
+
+    @Override
     public List<BatchJob> findByStatus(String status) {
         return jpaRepository.findByStatus(status);
     }

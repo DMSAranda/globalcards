@@ -13,9 +13,9 @@ class CardValidationServiceTest {
     void shouldValidateCorrectNumericCard() {
 
         Card card = Card.builder()
-                .cardId("123")
-                .pan("1234567812345678")
-                .holder("987654321")
+                .cardId("123456")
+                .pan("4532015112830366")
+                .holder("123456789")
                 .build();
 
         assertTrue(service.isValid(card));
@@ -26,8 +26,8 @@ class CardValidationServiceTest {
 
         Card card = Card.builder()
                 .cardId("ABC123")
-                .pan("1234567812345678")
-                .holder("987654321")
+                .pan("4532015112830366")
+                .holder("123456789")
                 .build();
 
         assertFalse(service.isValid(card));
@@ -37,9 +37,9 @@ class CardValidationServiceTest {
     void shouldRejectPanWithLetters() {
 
         Card card = Card.builder()
-                .cardId("1")
+                .cardId("CARD1")
                 .pan("1234ABCD5678")
-                .holder("987654321")
+                .holder("123456789")
                 .build();
 
         assertFalse(service.isValid(card));
@@ -49,9 +49,9 @@ class CardValidationServiceTest {
     void shouldRejectHolderWithLetters() {
 
         Card card = Card.builder()
-                .cardId("1")
-                .pan("1234567812345678")
-                .holder("ABC123")
+                .cardId("CARD1")
+                .pan("4532015112830366")
+                .holder("ABC")
                 .build();
 
         assertFalse(service.isValid(card));

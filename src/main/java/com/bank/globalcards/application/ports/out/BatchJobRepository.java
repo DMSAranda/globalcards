@@ -11,6 +11,10 @@ public interface BatchJobRepository {
     
     Optional<BatchJob> findByBatchId(String batchId);
     
+    Optional<BatchJob> findByBatchIdAndFileName(String batchId, String fileName);
+    
+    List<BatchJob> findByBatchIdOrderByFileNameAsc(String batchId);
+    
     List<BatchJob> findByStatus(String status);
     
     List<BatchJob> findAll();

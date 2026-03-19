@@ -1,7 +1,26 @@
 spring:
+
+  # Application Configuration
   application:
     name: globalcards
 
+  # Profiles Configuration
+  profiles:
+    active: dev
+
+  # Batch Configuration
+  batch:
+    job:
+      enabled: false
+    processing:
+      chunk-size: ${batch.processing.chunk-size:1000}
+      grid-size: ${batch.processing.grid-size:10}
+      max-retries: ${batch.processing.max-retries:3}
+      skip-limit: ${batch.processing.skip-limit:50}
+    jdbc:
+      initialize-schema: always
+
+  # Kafka Configuration
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
 
@@ -27,6 +46,7 @@ spring:
       cards-ko: cards.ko
       cards-dlq: cards.dlq
 
+  # Datasource Configuration
   datasource:
     url: jdbc:postgresql://localhost:5432/globalcards
     username: ${DB_USERNAME:postgres}
@@ -39,6 +59,7 @@ spring:
       idle-timeout: 30000
       pool-name: GlobalCardsPool
 
+  # JPA Configuration
   jpa:
     hibernate:
       ddl-auto: update
@@ -47,12 +68,6 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
-
-  batch:
-    jdbc:
-      initialize-schema: always
-    job:
-      enabled: false
 
 # AWS Configuration
 aws:

@@ -20,4 +20,17 @@ public interface BatchJobJpaRepository extends JpaRepository<BatchJob, Long> {
     List<BatchJob> findByStatusOrderByStartTimeDesc(@Param("status") String status);
 
     void deleteByBatchId(String batchId);
+
+    // Nuevos métodos para BatchJobService
+    Optional<BatchJob> findByBatchIdAndFileName(String batchId, String fileName);
+
+    List<BatchJob> findByBatchIdOrderByFileNameAsc(String batchId);
+
+    List<BatchJob> findByStatusNot(String status);
+
+    @Query("SELECT COUNT(b) FROM BatchJob b WHERE b.batchId = :batchId")
+    long countByBatchId(@Param("batchId") String batchId);
+
+    @Query("SELECT COUNT(b) FROM BatchJob b WHERE b.batchId = :batchId AND b.status = :status")
+    long countByBatchIdAndStatus(@Param("batchId") String batchId, @Param("status") String status);
 }

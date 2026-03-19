@@ -1,5 +1,6 @@
 package com.bank.globalcards.infrastructure.batch.config;
 
+import com.bank.globalcards.application.services.CsvParsingService;
 import com.bank.globalcards.infrastructure.batch.reader.S3CardItemReader;
 import com.bank.globalcards.infrastructure.s3.S3Properties;
 import com.bank.globalcards.infrastructure.s3.S3Service;
@@ -16,6 +17,7 @@ public class ReaderConfig {
 
     private final S3Service s3Service;
     private final S3Properties s3Properties;
+    private final CsvParsingService csvParsingService;
 
     @Bean
     @StepScope
@@ -27,6 +29,7 @@ public class ReaderConfig {
         return new S3CardItemReader(
                 s3Service,
                 s3Properties,
+                csvParsingService,
                 fileName,
                 startByte,
                 endByte
