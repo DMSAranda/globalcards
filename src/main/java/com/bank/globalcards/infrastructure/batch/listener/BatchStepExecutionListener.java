@@ -1,7 +1,5 @@
 package com.bank.globalcards.infrastructure.batch.listener;
 
-import com.bank.globalcards.application.services.BatchJobService;
-import com.bank.globalcards.application.services.CardBatchService;
 import com.bank.globalcards.application.services.BatchMetricsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.time.Instant;
+import org.springframework.batch.item.ExecutionContext;
 
 @Slf4j
 @Component
@@ -19,8 +18,6 @@ import java.time.Instant;
 public class BatchStepExecutionListener implements StepExecutionListener {
 
     private final BatchMetricsService metricsService;
-    private final BatchJobService batchJobService;
-    private final CardBatchService cardBatchService;
 
     private Instant startTime;
     private String fileName;
@@ -30,12 +27,16 @@ public class BatchStepExecutionListener implements StepExecutionListener {
     @Override
     public void beforeStep(StepExecution stepExecution) {
         startTime = Instant.now();
-        
-        // Extraer parámetros del step execution
-        fileName = stepExecution.getJobParameters().getString("fileName");
+
+        // Extraer parámetros del step execution (prioridad al contexto de partición)
+        ExecutionContext context = stepExecution.getExecutionContext();
+        fileName = context.containsKey("fileName")
+                ? context.getString("fileName")
+                : stepExecution.getJobParameters().getString("fileName");
         batchId = stepExecution.getJobParameters().getString("batchId");
-        partitionIndex = stepExecution.getStepName().contains("partition") ? 
-                Integer.parseInt(stepExecution.getStepName().split("-")[1]) : 0;
+        partitionIndex = context.containsKey("partitionIndex")
+                ? context.getInt("partitionIndex")
+                : 0;
 
         // Iniciar métricas de partición
         metricsService.recordPartitionStart(fileName, partitionIndex);
@@ -57,13 +58,6 @@ public class BatchStepExecutionListener implements StepExecutionListener {
                 (int) stepExecution.getSkipCount()   // Convertir long a int
         );
 
-        // Marcar checkpoint como completado
-        try {
-            cardBatchService.completePartition(batchId, fileName, partitionIndex);
-        } catch (Exception e) {
-            log.error("Error marking partition as completed: {}", e.getMessage(), e);
-        }
-
         // Logging enriquecido (manteniendo el formato original pero con más info)
         log.info("STEP FINISHED: {}", stepExecution.getStepName());
         log.info("File: {}, Batch: {}, Partition: {}", fileName, batchId, partitionIndex);
@@ -77,22 +71,7 @@ public class BatchStepExecutionListener implements StepExecutionListener {
         // Calcular throughput
         if (duration.toMillis() > 0) {
             double throughput = (double) stepExecution.getReadCount() / (duration.toMillis() / 1000.0);
-            log.info("Throughput: {:.2f} records/second", throughput);
-        }
-
-        // Verificar si el batch está completo
-        try {
-            if (cardBatchService.isBatchCompleted(batchId)) {
-                metricsService.recordBatchCompletion(
-                        batchId, 
-                        duration, 
-                        1, // files - esto debería calcularse mejor
-                        (int) stepExecution.getReadCount()
-                );
-                log.info("BATCH COMPLETED: {}", batchId);
-            }
-        } catch (Exception e) {
-            log.error("Error checking batch completion: {}", e.getMessage(), e);
+            log.info("Throughput: {} records/second", String.format("%.2f", throughput));
         }
 
         return stepExecution.getExitStatus();

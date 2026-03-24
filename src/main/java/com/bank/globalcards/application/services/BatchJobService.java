@@ -61,10 +61,14 @@ public class BatchJobService {
                         .startTime(java.time.Instant.now())
                         .build());
 
-        // Actualizar progreso
-        batchJob.setProcessedRecords((long) processedRecords);
-        batchJob.setTotalRecords((long) processedRecords);
-        batchJob.setFailedRecords((long) invalidRecords);
+        long currentProcessed = batchJob.getProcessedRecords() != null ? batchJob.getProcessedRecords() : 0L;
+        long currentTotal = batchJob.getTotalRecords() != null ? batchJob.getTotalRecords() : 0L;
+        long currentFailed = batchJob.getFailedRecords() != null ? batchJob.getFailedRecords() : 0L;
+
+        // Acumular progreso por chunk en lugar de sobrescribir.
+        batchJob.setProcessedRecords(currentProcessed + processedRecords);
+        batchJob.setTotalRecords(currentTotal + processedRecords);
+        batchJob.setFailedRecords(currentFailed + invalidRecords);
 
         BatchJob saved = batchJobRepository.save(batchJob);
         

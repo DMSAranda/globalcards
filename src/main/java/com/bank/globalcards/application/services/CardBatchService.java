@@ -107,24 +107,6 @@ public class CardBatchService {
         }
     }
 
-    // Método para completar partición
-    @Transactional
-    public void completePartition(String batchId, String fileName, int partitionNumber) {
-        try {
-            batchJobService.markBatchJobAsCompleted(batchId, fileName);
-            log.info("Marked partition {} as completed for batch {} file {}", partitionNumber, batchId, fileName);
-        } catch (Exception e) {
-            log.error("Error completing partition {} for batch {} file {}: {}", 
-                    partitionNumber, batchId, fileName, e.getMessage(), e);
-        }
-    }
-
-    // Método para verificar si el batch está completo
-    @Transactional(readOnly = true)
-    public boolean isBatchCompleted(String batchId) {
-        return batchJobService.isBatchCompleted(batchId);
-    }
-
     // Getters para inyección en otros componentes si es necesario
     public BatchMetricsService getMetricsService() {
         return metricsService;

@@ -14,17 +14,23 @@ import org.springframework.stereotype.Component;
 import java.time.Instant;
 import java.util.Optional;
 
+import com.bank.globalcards.application.services.BatchMetricsService;
+
 @Component
 @RequiredArgsConstructor
 public class BatchJobExecutionListener implements JobExecutionListener {
 
     private final BatchJobService batchJobService;
+    private final BatchMetricsService metricsService;
 
     @Override
     public void beforeJob(JobExecution jobExecution) {
+        String batchId = jobExecution.getJobParameters().getString("batchId", jobExecution.getJobId().toString());
+        String fileName = jobExecution.getJobParameters().getString("fileName", jobExecution.getJobInstance().getJobName());
+
         BatchJob batchJob = BatchJob.builder()
-                .batchId(jobExecution.getJobId().toString())
-                .fileName(jobExecution.getJobInstance().getJobName())
+                .batchId(batchId)
+                .fileName(fileName)
                 .status("RUNNING")
                 .startTime(Instant.now())
                 .build();
@@ -34,11 +40,13 @@ public class BatchJobExecutionListener implements JobExecutionListener {
 
     @Override
     public void afterJob(JobExecution jobExecution) {
-        String batchId = jobExecution.getJobId().toString();
+        String batchId = jobExecution.getJobParameters().getString("batchId", jobExecution.getJobId().toString());
         Optional<BatchJob> job = batchJobService.findByBatchId(batchId);
 
         if (job.isPresent()) {
             BatchJob batchJob = job.get();
+            Instant endTime = Instant.now();
+            Instant startTime = batchJob.getStartTime() != null ? batchJob.getStartTime() : endTime;
 
             batchJob.setTotalRecords(jobExecution.getStepExecutions().stream()
                     .mapToLong(StepExecution::getReadCount)
@@ -52,6 +60,12 @@ public class BatchJobExecutionListener implements JobExecutionListener {
 
             if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
                 batchJob.markAsCompleted();
+                metricsService.recordBatchCompletion(
+                        batchId,
+                        java.time.Duration.between(startTime, endTime),
+                        1,
+                        Math.toIntExact(batchJob.getTotalRecords() != null ? batchJob.getTotalRecords() : 0L)
+                );
             } else {
                 batchJob.markAsFailed("Job failed");
             }

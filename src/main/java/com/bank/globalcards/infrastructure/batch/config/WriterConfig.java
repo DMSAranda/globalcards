@@ -17,7 +17,7 @@ public class WriterConfig {
     @Bean
     @StepScope
     public CardItemWriter cardItemWriter(
-            @Value("#{jobParameters['fileName']}") String fileName,
+            @Value("#{stepExecutionContext['fileName']}") String fileName,
             @Value("#{jobParameters['batchId']}") String batchId,
             @Value("#{stepExecutionContext['partitionIndex']}") Integer partitionIndex) {
 

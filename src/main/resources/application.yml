@@ -1,3 +1,4 @@
+# Spring Configuration
 spring:
 
   # Application Configuration
@@ -116,3 +117,8 @@ management:
     metrics:
       export:
         enabled: true
+
+# GlobalCards Configuration
+globalcards:
+  batch-orchestrator:
+    enabled: ${BATCH_ORCHESTRATOR_ENABLED:false}
