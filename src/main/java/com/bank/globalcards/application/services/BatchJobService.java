@@ -2,6 +2,8 @@ package com.bank.globalcards.application.services;
 
 import com.bank.globalcards.application.ports.out.BatchJobRepository;
 import com.bank.globalcards.infrastructure.persistence.entity.BatchJob;
+import com.bank.globalcards.infrastructure.persistence.entity.BatchJobPartitionProgress;
+import com.bank.globalcards.infrastructure.persistence.repository.BatchJobPartitionProgressJpaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -16,6 +18,7 @@ import java.util.Optional;
 public class BatchJobService {
 
     private final BatchJobRepository batchJobRepository;
+    private final BatchJobPartitionProgressJpaRepository partitionProgressRepository;
 
     public BatchJob create(BatchJob batchJob) {
         log.info("Creating batch job with batchId {}", batchJob.getBatchId());
@@ -61,14 +64,43 @@ public class BatchJobService {
                         .startTime(java.time.Instant.now())
                         .build());
 
-        long currentProcessed = batchJob.getProcessedRecords() != null ? batchJob.getProcessedRecords() : 0L;
-        long currentTotal = batchJob.getTotalRecords() != null ? batchJob.getTotalRecords() : 0L;
-        long currentFailed = batchJob.getFailedRecords() != null ? batchJob.getFailedRecords() : 0L;
+        BatchJobPartitionProgress progress = partitionProgressRepository
+                .findByBatchIdAndFileNameAndPartitionIndex(batchId, fileName, partitionNumber)
+                .orElseGet(() -> BatchJobPartitionProgress.builder()
+                        .batchId(batchId)
+                        .fileName(fileName)
+                        .partitionIndex(partitionNumber)
+                        .processedBytes(0L)
+                        .processedRecords(0L)
+                        .validRecords(0L)
+                        .invalidRecords(0L)
+                        .status("RUNNING")
+                        .build());
 
-        // Acumular progreso por chunk en lugar de sobrescribir.
-        batchJob.setProcessedRecords(currentProcessed + processedRecords);
-        batchJob.setTotalRecords(currentTotal + processedRecords);
-        batchJob.setFailedRecords(currentFailed + invalidRecords);
+        progress.setProcessedBytes((progress.getProcessedBytes() != null ? progress.getProcessedBytes() : 0L) + processedBytes);
+        progress.setProcessedRecords((progress.getProcessedRecords() != null ? progress.getProcessedRecords() : 0L) + processedRecords);
+        progress.setValidRecords((progress.getValidRecords() != null ? progress.getValidRecords() : 0L) + validRecords);
+        progress.setInvalidRecords((progress.getInvalidRecords() != null ? progress.getInvalidRecords() : 0L) + invalidRecords);
+        if (lastCardId != null && !lastCardId.isBlank()) {
+            progress.setLastCardId(lastCardId);
+        }
+
+        partitionProgressRepository.save(progress);
+
+        // Consolidar cabecera a partir del detalle para mantener consistencia.
+        List<BatchJobPartitionProgress> partitionRows =
+                partitionProgressRepository.findByBatchIdAndFileNameOrderByPartitionIndexAsc(batchId, fileName);
+
+        long totalProcessed = partitionRows.stream()
+                .mapToLong(row -> row.getProcessedRecords() != null ? row.getProcessedRecords() : 0L)
+                .sum();
+        long totalInvalid = partitionRows.stream()
+                .mapToLong(row -> row.getInvalidRecords() != null ? row.getInvalidRecords() : 0L)
+                .sum();
+
+        batchJob.setProcessedRecords(totalProcessed);
+        batchJob.setTotalRecords(totalProcessed);
+        batchJob.setFailedRecords(totalInvalid);
 
         BatchJob saved = batchJobRepository.save(batchJob);
         
@@ -76,6 +108,16 @@ public class BatchJobService {
                 batchId, fileName, processedRecords);
         
         return saved;
+    }
+
+    @Transactional
+    public void markPartitionAsCompleted(String batchId, String fileName, int partitionNumber) {
+        partitionProgressRepository
+                .findByBatchIdAndFileNameAndPartitionIndex(batchId, fileName, partitionNumber)
+                .ifPresent(progress -> {
+                    progress.markAsCompleted();
+                    partitionProgressRepository.save(progress);
+                });
     }
 
     @Transactional

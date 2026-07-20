@@ -1,5 +1,6 @@
 package com.bank.globalcards.infrastructure.batch.listener;
 
+import com.bank.globalcards.application.services.BatchJobService;
 import com.bank.globalcards.application.services.BatchMetricsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +19,7 @@ import org.springframework.batch.item.ExecutionContext;
 public class BatchStepExecutionListener implements StepExecutionListener {
 
     private final BatchMetricsService metricsService;
+    private final BatchJobService batchJobService;
 
     private Instant startTime;
     private String fileName;
@@ -57,6 +59,18 @@ public class BatchStepExecutionListener implements StepExecutionListener {
                 (int) stepExecution.getWriteCount(), // Convertir long a int
                 (int) stepExecution.getSkipCount()   // Convertir long a int
         );
+
+        try {
+            batchJobService.markPartitionAsCompleted(batchId, fileName, partitionIndex);
+        } catch (Exception e) {
+            log.error(
+                    "Error marking partition as completed for batch {} file {} partition {}",
+                    batchId,
+                    fileName,
+                    partitionIndex,
+                    e
+            );
+        }
 
         // Logging enriquecido (manteniendo el formato original pero con más info)
         log.info("STEP FINISHED: {}", stepExecution.getStepName());
